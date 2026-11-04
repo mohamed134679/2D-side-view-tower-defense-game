@@ -34,7 +34,7 @@ float ENEMY_START_X = 780;
 float cutsceneStartTime;
 float elapsed;
 float t;
-Screens currentscreen = Screens::game;
+Screens currentscreen = Screens::mainmenu;
 int hoveredlane = -1;
 float spawntime;
 bool selectedlanes[4] = {false, false, false, false};
@@ -54,6 +54,8 @@ bool cursor_check;
 bool card1;
 bool card2;
 bool card3;
+bool start_hovered;
+bool exit_hovered;
 
 void rectangle_helper(float x,float y,float width,float height,glm::vec4 color){
     glm::mat4 g_transformMatrix = glm::mat4(1.0f);
@@ -709,6 +711,26 @@ void removedead_projectiles_andcoins(){
         }
     }
 }
+
+void resetgame(){
+    cutsceneStartTime = glfwGetTime();
+    currentscreen = Screens::cutscene;
+    spawntime = 0;
+    for(int i = 0;i<4;i++){
+        selectedlanes[i] = false;
+    }
+    enemies.clear();
+    players.clear();
+    projectiles.clear();
+    collectibles.clear();
+    for(int i = 0;i<3;i++){
+        unlocked_cards[i] = false;
+    }
+    inwave = 0;
+    currentwave = 0;
+    money = 30;
+    
+}
 void drawgamescreen(){
     drawBackground();
     double mx;
@@ -782,7 +804,11 @@ void drawgamescreen(){
     }
 }
 void drawmainmenuscreen(){
-    drawBackground();
+    glm::vec4 start_color = glm::vec4(0.13f, 0.55f, 0.30f, 1.0f);
+    glm::vec4 exit_color = glm::vec4(0.75f, 0.15f, 0.15f, 1.0f);
+    glm::vec4 text_color = glm::vec4(0.93f, 0.87f, 0.72f, 1.0f);
+    start_hovered = drawbutton(400,345,"START",start_color,text_color,200,50);
+    exit_hovered = drawbutton(400,255,"EXIT",exit_color,text_color,200,50);
 }
 void drawpausemenu(){
     drawBackground();
@@ -915,7 +941,18 @@ void mousebutton_callback(GLFWwindow* window, int button,int action, int mods){
             }
         }
         money-=no_playersto_spawn*prices[2];
-    }       
+    }   
+
+    if(button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS && currentscreen == Screens::mainmenu && start_hovered){
+        cutsceneStartTime = glfwGetTime();
+        elapsed = 0;
+        resetgame();
+        currentscreen = Screens::cutscene;
+    }
+
+    if(button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS && currentscreen == Screens::mainmenu && exit_hovered){
+        glfwSetWindowShouldClose(window, GLFW_TRUE);
+    }
 }
 
 const char* vertexShaderSource = R"(
