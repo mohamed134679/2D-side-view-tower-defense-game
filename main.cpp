@@ -56,6 +56,9 @@ bool card2;
 bool card3;
 bool start_hovered;
 bool exit_hovered;
+bool continue_hover;
+bool restart_hover;
+bool mainmenu_hover;
 
 void rectangle_helper(float x,float y,float width,float height,glm::vec4 color){
     glm::mat4 g_transformMatrix = glm::mat4(1.0f);
@@ -812,7 +815,23 @@ void drawmainmenuscreen(){
 }
 void drawpausemenu(){
     drawBackground();
-    rectangle_helper(500,250,100,108,glm::vec4(0.4,0.2,0.5,1.0));
+    for(Player& p:players){
+        p.stopped = true;
+    }
+    for(Enemy& e:enemies){
+        e.stopped = true;
+    }
+    drawgamescreen();
+    rectangle_helper(400,300,800,600,glm::vec4(0,0,0,0.5));
+    rectangle_helper(400,280,310,370,glm::vec4(0.40, 0.26, 0.13, 1.0));
+    rectangle_helper(400,280,300,360,glm::vec4(0.25, 0.16, 0.08, 1.0));
+    glm::vec4 continue_color = glm::vec4(0.13, 0.55, 0.30, 1.0);
+    glm::vec4 text_color = glm::vec4(0.93, 0.87, 0.72, 1.0);
+    glm::vec4 restart_color = glm::vec4(0.20, 0.42, 0.68, 1.0);
+    glm::vec4 mainmenu_color = glm::vec4(0.75, 0.15, 0.15, 1.0);
+    continue_hover = drawbutton(400,370,"CONTINUE",continue_color,text_color,200,50);
+    restart_hover =  drawbutton(400,280,"RESTART",restart_color,text_color,200,50);
+    mainmenu_hover = drawbutton(400,190,"MAIN MENU",mainmenu_color,text_color,200,50);
 }
 void drawwinmenu(){
     drawBackground();
@@ -952,6 +971,18 @@ void mousebutton_callback(GLFWwindow* window, int button,int action, int mods){
 
     if(button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS && currentscreen == Screens::mainmenu && exit_hovered){
         glfwSetWindowShouldClose(window, GLFW_TRUE);
+    }
+
+    if(button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS && currentscreen == Screens::pausemenu && continue_hover){
+        currentscreen = Screens::game;
+    }
+
+     if(button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS && currentscreen == Screens::pausemenu && restart_hover){
+        resetgame();
+    }
+
+     if(button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS && currentscreen == Screens::pausemenu && mainmenu_hover){
+        currentscreen = Screens::mainmenu;
     }
 }
 
@@ -1163,7 +1194,7 @@ int main()
         lastFrame = currentFrame;
         elapsed = currentFrame - cutsceneStartTime;
 
-        if(currentscreen != Screens::losemenu && currentscreen!=Screens::winmenu)
+        if(currentscreen!=Screens::losemenu && currentscreen!=Screens::winmenu && currentscreen!=Screens::pausemenu)
             t = currentFrame;
         float offsetX = sin(t) * 0.5f;
         float pulse = 0.75f + 0.25f * sin(t * 2.0f);
