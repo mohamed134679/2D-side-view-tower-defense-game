@@ -1,0 +1,12 @@
+# Visual Studio cache (about 350 MB, rebuilt automatically)
+.vs/
+
+# Build output (CMake on Mac, Visual Studio on Windows)
+build/
+x64/
+Debug/
+Release/
+
+# Personal editor and OS files
+.vscode/
+.DS_Store
