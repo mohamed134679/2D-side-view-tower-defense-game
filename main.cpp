@@ -106,6 +106,19 @@ void triangle_helper(float x,float y,float width,float height,glm::vec4 color){
     glDrawArrays(GL_TRIANGLES,0,3);
 } 
 
+glm::mat4 sword_rotate(float x,float y,float angle){
+    glm::mat4 m = glm::mat4(1.0f);
+    glm::mat4 translate_back = glm::mat4(1.0f);
+    translate_back = glm::translate(translate_back,glm::vec3(x,y,0.0f));
+    glm::mat4 rotate = glm::mat4(1.0f);
+    angle = glm::radians(angle);
+    rotate  = glm::rotate(rotate,angle,glm::vec3(0,0,1));
+    glm::mat4 translate_first = glm::mat4(1.0f);
+    translate_first = glm::translate(translate_first,glm::vec3(-x,-y,0.0f));
+    m = translate_back*rotate*translate_first;
+    return m;
+}
+
 void drawdigit(float x,float y,float w,float h,float th,glm::vec4 color,std::string num){
     if(num != "0" && num != "1" && num != "7")
     rectangle_helper(x,y,w,th,color);//g
@@ -123,9 +136,64 @@ void drawdigit(float x,float y,float w,float h,float th,glm::vec4 color,std::str
     rectangle_helper(x + (w/2 - th/2),y - (h/4 - th/4),th,h/2+th/2,color);//c
 }
 
+void drawletter(float x,float y,float w,float h,float th,glm::vec4 color,std::string letter){
+    if(letter == "S" || letter == "A" || letter == "E" || letter == "R")
+    rectangle_helper(x,y,w,th,color);//g
+    if(letter == "S" || letter == "O" || letter == "A" || letter == "E" || letter == "C" || letter == "I" || letter == "T" || letter == "R")
+    rectangle_helper(x,y + (h/2 - th/2),w,th,color);//a
+    if(letter == "S" || letter == "O" || letter == "E" || letter == "C" || letter == "U" || letter == "I")
+    rectangle_helper(x,y - (h/2 - th/2),w,th,color);//d
+    if(letter == "S" || letter == "O" || letter == "A" || letter == "E" || letter == "C" || letter == "U" || letter == "N" || letter == "M" || letter == "R")
+    rectangle_helper(x - (w/2 - th/2),y + (h/4 - th/4),th,h/2+th/2,color);//f
+    if(letter == "O" || letter == "A" || letter == "U" || letter == "N" || letter == "M" || letter == "R")
+    rectangle_helper(x + (w/2 - th/2),y + (h/4 - th/4),th,h/2+th/2,color);//b
+    if(letter == "O" || letter == "A" || letter == "E" || letter == "C" || letter == "U" || letter == "N" || letter == "M" || letter == "R")
+    rectangle_helper(x - (w/2 - th/2),y - (h/4 - th/4),th,h/2+th/2,color);//e
+    if(letter == "S" || letter == "O" || letter == "A" || letter == "U" || letter == "N" || letter == "M")
+    rectangle_helper(x + (w/2 - th/2),y - (h/4 - th/4),th,h/2+th/2,color);//c
+    if(letter == "I" || letter == "T")
+    rectangle_helper(x,y,th,h,color); //straight middle rect
+    if(letter == "N" || letter == "X"){
+        float angle = glm::degrees(atan((w - th)/h));
+        g_rotateMatrix = sword_rotate(x,y,angle);
+        rectangle_helper(x,y,th,h,color); // slanted straight middle rect
+        g_rotateMatrix = glm::mat4(1.0f);
+    }
+    if(letter == "X"){
+        float angle = glm::degrees(atan((w - th)/h));
+        g_rotateMatrix = sword_rotate(x,y,-angle);
+        rectangle_helper(x,y,th,h,color); // slanted straight middle rect
+        g_rotateMatrix = glm::mat4(1.0f);
+    }
+    if(letter == "M"){
+        float angle = glm::degrees(atan((w - th)/h));
+        g_rotateMatrix = sword_rotate(x-w/4,y+(h/4 - th/4),angle);
+        rectangle_helper(x-w/4,y + (h/4 - th/4),th,h/2,color);
+        g_rotateMatrix = glm::mat4(1.0f);
+    }
+    if(letter == "M"){
+        float angle = glm::degrees(atan((w - th)/h));
+        g_rotateMatrix = sword_rotate(x+w/4,y + (h/4 - th/4),-angle);
+        rectangle_helper(x+w/4,y + (h/4 - th/4),th,h/2,color);
+        g_rotateMatrix = glm::mat4(1.0f);
+    }
+    if(letter == "R"){
+        float angle = glm::degrees(atan((w - th)/h));
+        g_rotateMatrix = sword_rotate(x+w/4,y - (h/4 - th/4),angle);
+        rectangle_helper(x+w/4,y - (h/4 - th/4),th,h/2,color);
+        g_rotateMatrix = glm::mat4(1.0f);
+    }
+}
+
 void drawnumber(float x, float y, float w, float h, float th, glm::vec4 color, std::string str){
     for(int i = 0;i<str.length();i++){
         drawdigit(x + i*(w + 4),y,w,h,th,color,str.substr(i, 1));
+    }
+}
+
+void drawword(float x, float y, float w, float h, float th, glm::vec4 color, std::string str){
+    for(int i = 0;i<str.length();i++){
+        drawletter(x + i*(w + 4),y,w,h,th,color,str.substr(i, 1));
     }
 }
 
@@ -259,20 +327,6 @@ void drawboats(float x,float y,float scale){
     circle_helper(x,y+(42.0f*scale),5.0f*scale,5.0f*scale,lantern_color);
 }
 
-
-glm::mat4 sword_rotate(float x,float y,float angle){
-    glm::mat4 m = glm::mat4(1.0f);
-    glm::mat4 translate_back = glm::mat4(1.0f);
-    translate_back = glm::translate(translate_back,glm::vec3(x,y,0.0f));
-    glm::mat4 rotate = glm::mat4(1.0f);
-    angle = glm::radians(angle);
-    rotate  = glm::rotate(rotate,angle,glm::vec3(0,0,1));
-    glm::mat4 translate_first = glm::mat4(1.0f);
-    translate_first = glm::translate(translate_first,glm::vec3(-x,-y,0.0f));
-    m = translate_back*rotate*translate_first;
-    return m;
-}
-
 glm::mat4 duck_squash(float x,float y,float sy){
     glm::mat4 m = glm::mat4(1.0f);
     glm::mat4 translate_back = glm::mat4(1.0f);
@@ -396,8 +450,13 @@ bool drawbutton(float x,float y,std::string s,glm::vec4 button_color,glm::vec4 t
         rectangle_helper(x,y,width+10,height+10,hover_color);
     }
     rectangle_helper(x,y,width,height,button_color);
+    float w = 12;
+    float h = 20;
+    float th = 3;
+    float step = w + 4;
+    float offset = ((s.length()-1)*step)/2;
+    drawword(x-offset,y,w,h,th,text_color,s);
     return check;
-    //draw the text that text could be digits or a normal string 
 }
 
 void drawcard(float x,float y,Player_type type){
