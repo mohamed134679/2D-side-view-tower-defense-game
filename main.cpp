@@ -30,6 +30,7 @@ GLint locTransform;
 GLint locColour;
 float y_arr[] = {30.0f,120.0f, 210.0f, 300.0f};
 float PLAYER_START_X = 180;
+float DEFENSE_START_X = 280;
 float ENEMY_START_X = 780;
 float cutsceneStartTime;
 float elapsed;
@@ -43,7 +44,7 @@ std::vector<Player> players;
 std::vector<Projectiles> projectiles;
 std::vector<Collectibles> collectibles;
 int waves[] = {3,5,10};
-int prices[] = {10,40,60};
+int prices[] = {10,20,30};
 bool unlocked_cards[] = {false,false,false};
 int inwave = 0;
 int currentwave = 0;
@@ -377,11 +378,11 @@ bool drawbutton(float x,float y,std::string s,glm::vec4 button_color,glm::vec4 t
 }
 
 void drawcard(float x,float y,Player_type type){
-    if(money>=10 && type == Player_type::Fisherman){
+    if(money>=prices[(int) type] && type == Player_type::Fisherman){
         unlocked_cards[(int) type] = true;
-    }else if(money>= 40 && type == Player_type::Harpooner){
+    }else if(money>= prices[(int) type] && type == Player_type::Harpooner && currentwave>0){
         unlocked_cards[(int) type] = true;
-    }else if(money>= 60 && type == Player_type::Dockmaster){
+    }else if(money>= prices[(int) type] && type == Player_type::Dockmaster && currentwave>0){
         unlocked_cards[(int) type] = true;
     }else{
         unlocked_cards[(int) type] = false;
@@ -503,7 +504,11 @@ void spawnprojectiles(int lane,float posx,Projectile_type proj_type){
 
 void spawnplayers(Player_type type,int health,int lane){
     Player p;
-    p.posx = PLAYER_START_X;
+    if(type == Player_type::Dockmaster){
+        p.posx = DEFENSE_START_X;
+    }else{
+        p.posx = PLAYER_START_X;
+    }
     p.player_type = type;
     p.health = health;
     p.max_health = health;
@@ -595,8 +600,10 @@ void updateenemy(float dt){
 
 void updateplayer(float dt){
     for(Player& p:players){
-        if(p.posx>=760)
-            p.stopped = true;
+        if(p.posx>=ENEMY_START_X){
+            p.health = 0;
+            money+=prices[(int) p.player_type];
+        }
         if(p.jump_time>0){
             p.jump_time-=dt;
         }else if(p.duck_time>0){
@@ -655,6 +662,34 @@ void updatecombat_closerange(float dt){
                     if(e.enemy_type==Enemy_type::FirstMate && !isprotected(p)){
                         p.health-=2;
                         e.attacktime = 0;
+                    }
+                }
+            }
+        }
+    }
+    bool changed_player = true;
+    while(changed_player){
+        changed_player = false;
+        for(Player& p:players){
+            if(!p.stopped){
+                for(Player& q:players){
+                    if(p.lane == q.lane && q.stopped && q.posx>p.posx && q.posx - p.posx<=45){
+                        p.stopped = true;
+                        changed_player = true;
+                    }
+                }
+            }
+        }
+    }
+    bool changed_enemy = true;
+    while(changed_enemy){
+        changed_enemy = false;
+        for(Enemy& e:enemies){
+            if(!e.stopped){
+                for(Enemy& q:enemies){
+                    if(e.lane == q.lane && q.stopped && e.posx>q.posx && e.posx - q.posx<=45){
+                        e.stopped = true;
+                        changed_enemy = true;
                     }
                 }
             }
@@ -732,7 +767,15 @@ void resetgame(){
     inwave = 0;
     currentwave = 0;
     money = 30;
-    
+}
+
+bool hasdockmaster(int i){
+    for(Player& p:players){
+        if(p.lane == i && p.player_type == Player_type::Dockmaster){
+            return true;
+        }
+    }
+    return false;
 }
 void drawgamescreen(){
     drawBackground();
@@ -879,40 +922,7 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
         }else if(currentscreen == Screens::pausemenu && action == GLFW_PRESS){
             currentscreen = Screens::game;
         }
-    }
-
-    if(key == GLFW_KEY_1 && action == GLFW_PRESS && currentscreen == Screens::game){
-        int no_playersto_spawn = 0;
-        for(int i = 0;i<4;i++){
-            if(selectedlanes[i] && (money - no_playersto_spawn*prices[0]) >= prices[0]){
-                spawnplayers(Player_type::Fisherman,5,i);
-                no_playersto_spawn++;
-            }
-        }
-        money-=no_playersto_spawn*prices[0];
-    }
-
-    if(key == GLFW_KEY_2 && action == GLFW_PRESS && currentscreen == Screens::game){
-        int no_playersto_spawn = 0;
-        for(int i = 0;i<4;i++){
-            if(selectedlanes[i] &&  (money - no_playersto_spawn*prices[1]) >= prices[1]){
-                spawnplayers(Player_type::Harpooner,5,i);
-                no_playersto_spawn++;
-            }
-        }
-        money-=no_playersto_spawn*prices[1];
-    }
-
-    if(key == GLFW_KEY_3 && action == GLFW_PRESS && currentscreen == Screens::game){
-        int no_playersto_spawn = 0;
-        for(int i = 0;i<4;i++){
-            if(selectedlanes[i] &&  (money - no_playersto_spawn*prices[2]) >= prices[2]){
-                spawnplayers(Player_type::Dockmaster,7,i);
-                no_playersto_spawn++;
-            }
-        }
-        money-=no_playersto_spawn*prices[2];
-    }        
+    }     
 
     if((key == GLFW_KEY_UP || key == GLFW_KEY_W) && action == GLFW_PRESS && currentscreen == Screens::game){
         for(int i = 0;i<4;i++){
@@ -968,7 +978,7 @@ void mousebutton_callback(GLFWwindow* window, int button,int action, int mods){
     if(button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS && currentscreen == Screens::game && card3){
         int no_playersto_spawn = 0;
         for(int i = 0;i<4;i++){
-            if(selectedlanes[i] &&  (money - no_playersto_spawn*prices[2]) >= prices[2]){
+            if(selectedlanes[i] &&  (money - no_playersto_spawn*prices[2]) >= prices[2] && !hasdockmaster(i)){
                 spawnplayers(Player_type::Dockmaster,7,i);
                 no_playersto_spawn++;
             }
