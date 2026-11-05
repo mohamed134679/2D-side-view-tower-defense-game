@@ -842,8 +842,15 @@ void drawwinmenu(){
         e.stopped = true;
     }
     drawgamescreen();
+    glm::vec4 brown_color = glm::vec4(0.25, 0.16, 0.08, 1.0);
+    glm::vec4 restart_color = glm::vec4(0.20, 0.42, 0.68, 1.0);
+    glm::vec4 mainmenu_color = glm::vec4(0.75, 0.15, 0.15, 1.0);
+    glm::vec4 text_color = glm::vec4(0.93, 0.87, 0.72, 1.0);
     rectangle_helper(400,300,800,600,glm::vec4(0,0,0,0.5));
-    rectangle_helper(400,300,300,200,glm:: vec4(0.0f, 0.659f, 0.349f, 1.0f));
+    rectangle_helper(400,290,310,270,glm:: vec4(0.0f, 0.659f, 0.349f, 1.0f));
+    rectangle_helper(400,290,300,260,brown_color);
+    restart_hover = drawbutton(400,320,"RESTART",restart_color,text_color,200,50);
+    mainmenu_hover = drawbutton(400,230,"MAIN MENU",mainmenu_color,text_color,200,50);
 }
 void drawlosemenu(){
     for(Player& p:players){
@@ -853,8 +860,15 @@ void drawlosemenu(){
         e.stopped = true;
     }
     drawgamescreen();
+    glm::vec4 brown_color = glm::vec4(0.25, 0.16, 0.08, 1.0);
+    glm::vec4 restart_color = glm::vec4(0.20, 0.42, 0.68, 1.0);
+    glm::vec4 mainmenu_color = glm::vec4(0.75, 0.15, 0.15, 1.0);
+    glm::vec4 text_color = glm::vec4(0.93, 0.87, 0.72, 1.0);
     rectangle_helper(400,300,800,600,glm::vec4(0,0,0,0.5));
-    rectangle_helper(400,300,300,200,glm::vec4(1.0, 0.0, 1.0, 1.0));
+    rectangle_helper(400,290,310,270,glm:: vec4(0.55, 0.08, 0.08, 1.0));
+    rectangle_helper(400,290,300,260,brown_color);
+    restart_hover = drawbutton(400,320,"RESTART",restart_color,text_color,200,50);
+    mainmenu_hover = drawbutton(400,230,"MAIN MENU",mainmenu_color,text_color,200,50);
 }
 
 
@@ -977,11 +991,11 @@ void mousebutton_callback(GLFWwindow* window, int button,int action, int mods){
         currentscreen = Screens::game;
     }
 
-     if(button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS && currentscreen == Screens::pausemenu && restart_hover){
+     if(button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS && (currentscreen == Screens::pausemenu || currentscreen == Screens::losemenu || currentscreen == Screens::winmenu) && restart_hover){
         resetgame();
     }
 
-     if(button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS && currentscreen == Screens::pausemenu && mainmenu_hover){
+     if(button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS && (currentscreen == Screens::pausemenu || currentscreen == Screens::losemenu || currentscreen == Screens::winmenu) && mainmenu_hover){
         currentscreen = Screens::mainmenu;
     }
 }
