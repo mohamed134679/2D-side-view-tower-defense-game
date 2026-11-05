@@ -106,6 +106,29 @@ void triangle_helper(float x,float y,float width,float height,glm::vec4 color){
     glDrawArrays(GL_TRIANGLES,0,3);
 } 
 
+void drawdigit(float x,float y,float w,float h,float th,glm::vec4 color,std::string num){
+    if(num != "0" && num != "1" && num != "7")
+    rectangle_helper(x,y,w,th,color);//g
+    if(num != "1" && num != "4")
+    rectangle_helper(x,y + (h/2 - th/2),w,th,color);//a
+    if(num != "1" && num != "4" && num != "7")
+    rectangle_helper(x,y - (h/2 - th/2),w,th,color);//d
+    if(num != "1" && num != "2" && num != "3" && num != "7")
+    rectangle_helper(x - (w/2 - th/2),y + (h/4 - th/4),th,h/2+th/2,color);//f
+    if(num != "5" && num != "6")
+    rectangle_helper(x + (w/2 - th/2),y + (h/4 - th/4),th,h/2+th/2,color);//b
+    if(num != "1" && num != "3" && num != "4" && num != "5" && num != "7" && num != "9")
+    rectangle_helper(x - (w/2 - th/2),y - (h/4 - th/4),th,h/2+th/2,color);//e
+    if(num != "2")
+    rectangle_helper(x + (w/2 - th/2),y - (h/4 - th/4),th,h/2+th/2,color);//c
+}
+
+void drawnumber(float x, float y, float w, float h, float th, glm::vec4 color, std::string str){
+    for(int i = 0;i<str.length();i++){
+        drawdigit(x + i*(w + 4),y,w,h,th,color,str.substr(i, 1));
+    }
+}
+
 void drawsea(){
     glm::vec4 color = glm::vec4(0.039f, 0.196f, 0.259f, 1.0f);
     rectangle_helper(400,200,800,400,color);
@@ -406,6 +429,7 @@ void drawcard(float x,float y,Player_type type){
     rectangle_helper(x,y,64,112,wood_frame_color);
     rectangle_helper(x,y,56,104,(cursor_check && currentscreen==Screens::game)?parchment_color_hovered:parchment_color);
     rectangle_helper(x,y-32,56,2,wood_frame_color);
+    drawnumber(x-6,y-42,8,14,2,digits_color,std::to_string(prices[(int) type]));
     if(type == Player_type::Fisherman){
         card1 = cursor_check;
         drawFisherman(x-3.5,y-28,0,0);
@@ -848,6 +872,9 @@ void drawgamescreen(){
         float y_pos = y_arr[c.lane] + 8;
         drawcollectibles(c.posx,y_pos);
     }
+
+    drawcollectibles(420,521);
+    drawnumber(442, 534, 12, 20, 3,glm::vec4(0.93, 0.87, 0.72,1), std::to_string(money));
 }
 void drawmainmenuscreen(){
     glm::vec4 start_color = glm::vec4(0.13f, 0.55f, 0.30f, 1.0f);
