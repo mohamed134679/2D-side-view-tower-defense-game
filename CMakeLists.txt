@@ -14,6 +14,10 @@ add_executable(game main.cpp src/glad.c
     Enemy_type.h
     Projectiles.h
     Projectile_type.h
-    Collectibles.h)
+    Collectibles.h
+    miniaudio.h)
 target_include_directories(game PRIVATE . include)
 target_link_libraries(game PRIVATE glfw OpenGL::GL)
+
+# copy the sound files next to the game so it finds them when run from build/
+file(COPY sounds DESTINATION ${CMAKE_BINARY_DIR})

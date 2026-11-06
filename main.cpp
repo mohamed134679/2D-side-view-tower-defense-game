@@ -1,7 +1,8 @@
 #include <glad/glad.h>   
 #include <GLFW/glfw3.h>
 #include <iostream>
-#include <cmath>  
+#include <cmath> 
+#define MINIAUDIO_IMPLEMENTATION 
 
 #include <glm/glm.hpp>                  
 #include <glm/gtc/matrix_transform.hpp> 
@@ -15,6 +16,7 @@
 #include <ctime>     // time
 #include "Collectibles.h"
 #include <string>
+#include "miniaudio.h"
 
 GLFWwindow* window;
 int g_screenWidth = 800;
@@ -60,6 +62,42 @@ bool exit_hovered;
 bool continue_hover;
 bool restart_hover;
 bool mainmenu_hover;
+ma_engine engine;
+ma_sound music;
+bool sound_ok = false;
+int volume_level = 5;
+bool muted = false;
+bool sound_hovered;
+bool plus_hovered;
+bool minus_hovered;
+bool mute_hovered;
+
+void playsfx(const char* file){
+    if(sound_ok){
+        ma_engine_play_sound(&engine,file,NULL);
+    }
+}
+
+void applyvolume(){
+    if(!sound_ok)
+        return;
+    if(muted)
+        ma_engine_set_volume(&engine,0);
+    else
+        ma_engine_set_volume(&engine, volume_level/10.0f);
+}
+
+void getmouse(double& gamex, double& gamey){
+    double mx;
+    double my;
+    int ww;
+    int wh;
+
+    glfwGetCursorPos(window,&mx,&my);
+    glfwGetWindowSize(window,&ww,&wh);
+    gamex = (mx*800)/ww;
+    gamey = 600 - ((600*my)/wh);
+}
 
 void rectangle_helper(float x,float y,float width,float height,glm::vec4 color){
     glm::mat4 g_transformMatrix = glm::mat4(1.0f);
@@ -137,7 +175,7 @@ void drawdigit(float x,float y,float w,float h,float th,glm::vec4 color,std::str
 }
 
 void drawletter(float x,float y,float w,float h,float th,glm::vec4 color,std::string letter){
-    if(letter == "S" || letter == "A" || letter == "E" || letter == "R" || letter == "H" || letter == "P")
+    if(letter == "S" || letter == "A" || letter == "E" || letter == "R" || letter == "H" || letter == "P" || letter == "+" || letter == "-")
     rectangle_helper(x,y,w,th,color);//g
     if(letter == "S" || letter == "O" || letter == "A" || letter == "E" || letter == "C" || letter == "I" || letter == "T" || letter == "R" || letter == "G" || letter == "P")
     rectangle_helper(x,y + (h/2 - th/2),w,th,color);//a
@@ -151,7 +189,7 @@ void drawletter(float x,float y,float w,float h,float th,glm::vec4 color,std::st
     rectangle_helper(x - (w/2 - th/2),y - (h/4 - th/4),th,h/2+th/2,color);//e
     if(letter == "S" || letter == "O" || letter == "A" || letter == "U" || letter == "N" || letter == "M" || letter == "H" || letter == "G")
     rectangle_helper(x + (w/2 - th/2),y - (h/4 - th/4),th,h/2+th/2,color);//c
-    if(letter == "I" || letter == "T")
+    if(letter == "I" || letter == "T" || letter == "+")
     rectangle_helper(x,y,th,h,color); //straight middle rect
     if(letter == "N" || letter == "X"){
         float angle = glm::degrees(atan((w - th)/h));
@@ -662,9 +700,9 @@ void drawhealthbar(float x,float y,int health,int max_health){
 }
 
 bool drawbutton(float x,float y,std::string s,glm::vec4 button_color,glm::vec4 text_color,float width,float height){
-    double posx,posy;
-    glfwGetCursorPos(window,&posx,&posy);
-    double gamey = 600 - posy;
+    double posx;
+    double gamey;
+    getmouse(posx, gamey);
     bool check = (posx>=x-(width/2) && posx<x+(width/2)) && (gamey>=y-(height/2) && gamey<y+(height/2));
     glm::vec4 hover_color = glm::vec4(1.0, 0.92, 0.55,1.0);
     if(check){
@@ -711,9 +749,9 @@ void drawcard(float x,float y,Player_type type){
     glm::vec4 parchment_color = glm::vec4(0.93, 0.87, 0.72,1.0);
     glm::vec4 parchment_color_hovered = glm::vec4(1.0, 0.96, 0.84,1.0);
 
-    double xpos, ypos;
-    glfwGetCursorPos(window, &xpos, &ypos);
-    double gamey = 600 - ypos;
+    double xpos;
+    double gamey;
+    getmouse(xpos,gamey);
     cursor_check = unlocked_cards[(int) type]&&(xpos>=x-32 && xpos<x+32) && (gamey>=y-56 && gamey<y+56);
     if(cursor_check && currentscreen==Screens::game){
         y+=6;
@@ -858,7 +896,13 @@ void spawnplayers(Player_type type,int health,int lane){
     if(p.player_type == Player_type::Harpooner){
         p.shooting_time = 1;
     }
+    for(Player& q:players){
+        if(q.posx + 55 > p.posx && q.lane == p.lane && p.player_type == Player_type::Dockmaster){
+            p.posx = q.posx + 55;
+        }
+    }
     players.push_back(p);
+    playsfx("sounds/place.wav");
 }
 
 void spawnenemies(Enemy_type type){
@@ -938,6 +982,8 @@ void updateenemy(float dt){
     for(Enemy& e:enemies){
         if(e.posx<=PLAYER_START_X){
             e.stopped = true;
+            if(currentscreen == Screens::game)
+                playsfx("sounds/lose.wav");
             currentscreen = Screens::losemenu;
         }
         if(!e.stopped)
@@ -1066,13 +1112,15 @@ void spawnenemy_check(){
 void removedead_projectiles_andcoins(){
     for(int i = 0;i<players.size();i++){
         if(players.at(i).health <= 0){
+            playsfx("sounds/death.wav");
             players.erase(players.begin() + i);
             i--;
         }
     }
     for(int i = 0;i<enemies.size();i++){
         if(enemies.at(i).health <= 0){
-            spawnecollectibles(enemies.at(i).posx,5,enemies.at(i).lane);
+            spawnecollectibles(enemies.at(i).posx,200,enemies.at(i).lane);
+            playsfx("sounds/death.wav");
             enemies.erase(enemies.begin() + i);
             i--;
         }
@@ -1090,6 +1138,7 @@ void removedead_projectiles_andcoins(){
             if(players.at(j).lane == collectibles.at(i).lane && fabs(players.at(j).posx - collectibles.at(i).posx)<=20){
                 money+=collectibles.at(i).price;
                 collectibles.erase(collectibles.begin() + i);
+                playsfx("sounds/coin.wav");
                 i--;
                 break;
             }
@@ -1116,20 +1165,11 @@ void resetgame(){
     money = 30;
 }
 
-bool hasdockmaster(int i){
-    for(Player& p:players){
-        if(p.lane == i && p.player_type == Player_type::Dockmaster){
-            return true;
-        }
-    }
-    return false;
-}
 void drawgamescreen(){
     drawBackground();
     double mx;
-    double my;
-    glfwGetCursorPos(window,&mx,&my);
-    double gamey = 600 - my;
+    double gamey;
+    getmouse(mx,gamey);
     hoveredlane = -1;
     for(int i = 0;i<=3;i++){
         glm::vec4 color;
@@ -1218,9 +1258,11 @@ void drawgamescreen(){
 void drawmainmenuscreen(){
     glm::vec4 start_color = glm::vec4(0.13f, 0.55f, 0.30f, 1.0f);
     glm::vec4 exit_color = glm::vec4(0.75f, 0.15f, 0.15f, 1.0f);
+    glm::vec4 sound_color = glm::vec4(0.20, 0.42, 0.68,1.0);
     glm::vec4 text_color = glm::vec4(0.93f, 0.87f, 0.72f, 1.0f);
     start_hovered = drawbutton(400,345,"START",start_color,text_color,200,50);
-    exit_hovered = drawbutton(400,255,"EXIT",exit_color,text_color,200,50);
+    exit_hovered = drawbutton(400,165,"EXIT",exit_color,text_color,200,50);
+    sound_hovered = drawbutton(400, 255,"SOUND",sound_color, text_color, 200, 50);
 }
 void drawpausemenu(){
     drawBackground();
@@ -1279,6 +1321,28 @@ void drawlosemenu(){
     restart_hover = drawbutton(400,320,"RESTART",restart_color,text_color,200,50);
     mainmenu_hover = drawbutton(400,230,"MAIN MENU",mainmenu_color,text_color,200,50);
 }
+void drawsoundmenu(){
+    glm::vec4 text_color = glm::vec4(0.93, 0.87, 0.72, 1.0);
+    glm::vec4 plus_minus_color = glm::vec4(0.20, 0.42, 0.68,1.0);
+    glm::vec4 mute_unmute_color = glm::vec4(0.30, 0.30, 0.35,1.0);
+    glm::vec4 main_menu_color = glm::vec4(0.75, 0.15, 0.15,1.0);
+
+    drawsubtitle(400,470,"SOUND");
+    minus_hovered = drawbutton(250, 360, "-",plus_minus_color ,text_color, 60, 50);
+    plus_hovered = drawbutton (550, 360, "+",plus_minus_color, text_color, 60, 50);
+    for(int i = 0;i<=9;i++){
+        glm::vec4 hear_color = glm::vec4(1.0, 0.85, 0.30,1.0);
+        glm::vec4 unhear_color = glm::vec4(0.35, 0.35, 0.40,1.0);
+        if(i < volume_level && !muted)
+            rectangle_helper(310 + i*20, 360, 14, 30,hear_color);
+        else
+            rectangle_helper(310 + i*20, 360, 14, 30,unhear_color);
+
+    }
+    mute_hovered = drawbutton (400, 270, muted ? "UNMUTE" : "MUTE",mute_unmute_color, text_color, 200, 50);
+    mainmenu_hover = drawbutton(400, 180, "MAIN MENU",main_menu_color, text_color, 200, 50);
+
+}
 
 
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods){
@@ -1317,6 +1381,7 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 void mousebutton_callback(GLFWwindow* window, int button,int action, int mods){
         if(currentscreen == Screens::game && hoveredlane>=0 && hoveredlane<=3 && button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS){
             selectedlanes[hoveredlane] = !selectedlanes[hoveredlane];
+            playsfx("sounds/select.wav");
         }
 
     if(button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS && currentscreen == Screens::game && card1){
@@ -1344,7 +1409,7 @@ void mousebutton_callback(GLFWwindow* window, int button,int action, int mods){
     if(button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS && currentscreen == Screens::game && card3){
         int no_playersto_spawn = 0;
         for(int i = 0;i<4;i++){
-            if(selectedlanes[i] &&  (money - no_playersto_spawn*prices[2]) >= prices[2] && !hasdockmaster(i)){
+            if(selectedlanes[i] &&  (money - no_playersto_spawn*prices[2]) >= prices[2]){
                 spawnplayers(Player_type::Dockmaster,7,i);
                 no_playersto_spawn++;
             }
@@ -1371,9 +1436,35 @@ void mousebutton_callback(GLFWwindow* window, int button,int action, int mods){
         resetgame();
     }
 
-     if(button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS && (currentscreen == Screens::pausemenu || currentscreen == Screens::losemenu || currentscreen == Screens::winmenu) && mainmenu_hover){
+     if(button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS && (currentscreen == Screens::pausemenu || currentscreen == Screens::losemenu || currentscreen == Screens::winmenu || currentscreen == Screens::soundmenu) && mainmenu_hover){
         currentscreen = Screens::mainmenu;
+        return;
     }
+
+    if(button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS && currentscreen == Screens::mainmenu && sound_hovered){
+        currentscreen = Screens::soundmenu;
+    }
+
+    if(button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS && currentscreen == Screens::soundmenu && mute_hovered){
+        muted = !muted;
+        applyvolume();
+    }
+
+    if(button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS && currentscreen == Screens::soundmenu && minus_hovered){
+       if(volume_level > 0){
+            volume_level--;
+            applyvolume();
+            playsfx("sounds/select.wav");
+       }
+    }
+    
+    if(button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS && currentscreen == Screens::soundmenu && plus_hovered){
+       if(volume_level < 10){
+            volume_level++;
+            applyvolume();
+            playsfx("sounds/select.wav");
+       }
+    }    
 }
 
 const char* vertexShaderSource = R"(
@@ -1429,8 +1520,9 @@ int main()
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+    glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
 
-    window = glfwCreateWindow(g_screenWidth, g_screenHeight, "Triangle", nullptr, nullptr);
+    window = glfwCreateWindow(1024, 768, "Keepers of the Last Light", nullptr, nullptr);
     if (!window) {
         std::cerr << "Failed to create window\n";
         glfwTerminate();
@@ -1443,6 +1535,14 @@ int main()
         std::cerr << "Failed to init GLAD\n";
         return -1;
     }
+
+    sound_ok = ma_engine_init(NULL,&engine) == MA_SUCCESS;
+    if(sound_ok && ma_sound_init_from_file(&engine,"sounds/music.wav",0,NULL,NULL,&music) == MA_SUCCESS){
+        ma_sound_set_looping(&music,MA_TRUE);
+        ma_sound_start(&music);
+    }
+
+    applyvolume();
 
     int width, height;
     glfwGetFramebufferSize(window, &width, &height);
@@ -1620,6 +1720,7 @@ int main()
                         currentwave++;
                         inwave = 0;
                     }else{
+                        playsfx("sounds/win.wav");
                         currentscreen = Screens::winmenu;
                     }
                 }
@@ -1639,6 +1740,9 @@ int main()
                 break;
             case Screens::losemenu:
                 drawlosemenu();
+                break;
+            case Screens::soundmenu:
+                drawsoundmenu();
                 break;      
         }
 
@@ -1654,7 +1758,8 @@ int main()
     glDeleteVertexArrays(1, &vao_circle);
     glDeleteBuffers(1, &circle_VBO);
     glDeleteProgram(shaderProgram);
-
+    if(sound_ok)
+        ma_engine_uninit(&engine);
     glfwTerminate();
     return 0;
 }

@@ -10,5 +10,6 @@ enum class Screens {
     game,
     pausemenu,
     winmenu,
-    losemenu
+    losemenu,
+    soundmenu
 };
