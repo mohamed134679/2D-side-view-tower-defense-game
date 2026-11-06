@@ -52,7 +52,7 @@ int inwave = 0;
 int currentwave = 0;
 float g_hurt;
 float g_grey;
-int money = 30;
+int money = 200;
 bool cursor_check;
 bool card1;
 bool card2;
@@ -65,7 +65,7 @@ bool mainmenu_hover;
 ma_engine engine;
 ma_sound music;
 bool sound_ok = false;
-int volume_level = 5;
+int volume_level = 1;
 bool muted = false;
 bool sound_hovered;
 bool plus_hovered;
@@ -1162,7 +1162,7 @@ void resetgame(){
     }
     inwave = 0;
     currentwave = 0;
-    money = 30;
+    money = 200;
 }
 
 void drawgamescreen(){
@@ -1434,6 +1434,7 @@ void mousebutton_callback(GLFWwindow* window, int button,int action, int mods){
 
      if(button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS && (currentscreen == Screens::pausemenu || currentscreen == Screens::losemenu || currentscreen == Screens::winmenu) && restart_hover){
         resetgame();
+        currentscreen = Screens::game;
     }
 
      if(button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS && (currentscreen == Screens::pausemenu || currentscreen == Screens::losemenu || currentscreen == Screens::winmenu || currentscreen == Screens::soundmenu) && mainmenu_hover){
