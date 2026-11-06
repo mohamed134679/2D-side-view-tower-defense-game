@@ -137,19 +137,19 @@ void drawdigit(float x,float y,float w,float h,float th,glm::vec4 color,std::str
 }
 
 void drawletter(float x,float y,float w,float h,float th,glm::vec4 color,std::string letter){
-    if(letter == "S" || letter == "A" || letter == "E" || letter == "R")
+    if(letter == "S" || letter == "A" || letter == "E" || letter == "R" || letter == "H" || letter == "P")
     rectangle_helper(x,y,w,th,color);//g
-    if(letter == "S" || letter == "O" || letter == "A" || letter == "E" || letter == "C" || letter == "I" || letter == "T" || letter == "R")
+    if(letter == "S" || letter == "O" || letter == "A" || letter == "E" || letter == "C" || letter == "I" || letter == "T" || letter == "R" || letter == "G" || letter == "P")
     rectangle_helper(x,y + (h/2 - th/2),w,th,color);//a
-    if(letter == "S" || letter == "O" || letter == "E" || letter == "C" || letter == "U" || letter == "I")
+    if(letter == "S" || letter == "O" || letter == "E" || letter == "C" || letter == "U" || letter == "I" || letter == "L" || letter == "G")
     rectangle_helper(x,y - (h/2 - th/2),w,th,color);//d
-    if(letter == "S" || letter == "O" || letter == "A" || letter == "E" || letter == "C" || letter == "U" || letter == "N" || letter == "M" || letter == "R")
+    if(letter == "S" || letter == "O" || letter == "A" || letter == "E" || letter == "C" || letter == "U" || letter == "N" || letter == "M" || letter == "R" || letter == "D" || letter == "H" || letter == "L" || letter == "G" || letter == "P")
     rectangle_helper(x - (w/2 - th/2),y + (h/4 - th/4),th,h/2+th/2,color);//f
-    if(letter == "O" || letter == "A" || letter == "U" || letter == "N" || letter == "M" || letter == "R")
+    if(letter == "O" || letter == "A" || letter == "U" || letter == "N" || letter == "M" || letter == "R" || letter == "H" || letter == "P")
     rectangle_helper(x + (w/2 - th/2),y + (h/4 - th/4),th,h/2+th/2,color);//b
-    if(letter == "O" || letter == "A" || letter == "E" || letter == "C" || letter == "U" || letter == "N" || letter == "M" || letter == "R")
+    if(letter == "O" || letter == "A" || letter == "E" || letter == "C" || letter == "U" || letter == "N" || letter == "M" || letter == "R" || letter == "D" || letter == "H" || letter == "L" || letter == "G" || letter == "P")
     rectangle_helper(x - (w/2 - th/2),y - (h/4 - th/4),th,h/2+th/2,color);//e
-    if(letter == "S" || letter == "O" || letter == "A" || letter == "U" || letter == "N" || letter == "M")
+    if(letter == "S" || letter == "O" || letter == "A" || letter == "U" || letter == "N" || letter == "M" || letter == "H" || letter == "G")
     rectangle_helper(x + (w/2 - th/2),y - (h/4 - th/4),th,h/2+th/2,color);//c
     if(letter == "I" || letter == "T")
     rectangle_helper(x,y,th,h,color); //straight middle rect
@@ -165,23 +165,32 @@ void drawletter(float x,float y,float w,float h,float th,glm::vec4 color,std::st
         rectangle_helper(x,y,th,h,color); // slanted straight middle rect
         g_rotateMatrix = glm::mat4(1.0f);
     }
-    if(letter == "M"){
+    if(letter == "M" || letter == "Y"){
         float angle = glm::degrees(atan((w - th)/h));
         g_rotateMatrix = sword_rotate(x-w/4,y+(h/4 - th/4),angle);
         rectangle_helper(x-w/4,y + (h/4 - th/4),th,h/2,color);
         g_rotateMatrix = glm::mat4(1.0f);
     }
-    if(letter == "M"){
+    if(letter == "M" || letter == "Y"){
         float angle = glm::degrees(atan((w - th)/h));
         g_rotateMatrix = sword_rotate(x+w/4,y + (h/4 - th/4),-angle);
         rectangle_helper(x+w/4,y + (h/4 - th/4),th,h/2,color);
         g_rotateMatrix = glm::mat4(1.0f);
+    }
+    if(letter == "Y"){
+        rectangle_helper(x,y-h/4,th,h/2,color);
     }
     if(letter == "R"){
         float angle = glm::degrees(atan((w - th)/h));
         g_rotateMatrix = sword_rotate(x+w/4,y - (h/4 - th/4),angle);
         rectangle_helper(x+w/4,y - (h/4 - th/4),th,h/2,color);
         g_rotateMatrix = glm::mat4(1.0f);
+    }
+    if(letter == "D"){
+        rectangle_helper(x - th/2,y + (h/2 - th/2),w-th,th,color);// top
+        rectangle_helper(x - th/2,y - (h/2 - th/2),w-th,th,color);// bottom
+        rectangle_helper(x + (w/2 - th/2),y + (h/4 - th/4) - th/2,th,h/2 - th/2,color);//upper right
+        rectangle_helper(x + (w/2 - th/2),y - (h/4 - th/4) + th/2,th,h/2 - th/2,color);//lower right
     }
 }
 
@@ -339,6 +348,109 @@ glm::mat4 duck_squash(float x,float y,float sy){
     return m;
 }
 
+void drawHarpoon(float x,float y,float step){
+    glm::vec4 boot_color = glm::vec4(0.12, 0.10, 0.09,1.0);
+    glm::vec4 pants_color = glm::vec4(0.30, 0.27, 0.24,1.0);
+    glm::vec4 coat_color = glm::vec4(0.30, 0.40, 0.26,1.0);
+    glm::vec4 coat_dark_color = glm::vec4(0.21, 0.29, 0.18,1.0);
+    glm::vec4 strap_color = glm::vec4(0.42, 0.26, 0.12,1.0);
+    glm::vec4 scarf_color = glm::vec4(0.75, 0.16, 0.14,1.0);
+    glm::vec4 skin_color = glm::vec4(0.90, 0.72, 0.56,1.0);
+    glm::vec4 skin_dark_color = glm::vec4(0.80, 0.58, 0.44,1.0);
+    glm::vec4 hair_color = glm::vec4(0.30, 0.20, 0.12,1.0);
+    glm::vec4 dark_color = glm::vec4(0.10, 0.10, 0.12,1.0);
+    glm::vec4 beanie_color = glm::vec4(0.36, 0.42, 0.54,1.0);
+    glm::vec4 beanie_dark_color = glm::vec4(0.27, 0.32, 0.42,1.0);
+    glm::vec4 wood_color = glm::vec4(0.50, 0.34, 0.18,1.0);
+    glm::vec4 steel_color = glm::vec4(0.78, 0.80, 0.84,1.0);
+    glm::vec4 rope_color = glm::vec4(0.82, 0.70, 0.46,1.0);
+    glm::vec4 rope_dark_color = glm::vec4(0.58, 0.47, 0.29,1.0);
+
+    float swing = 4*step;
+    float by = y + fabs(step)*2;
+
+    circle_helper(x-12,by+34,15,15,rope_color); //rope coil
+    circle_helper(x-12,by+34,7,7,rope_dark_color); //coil hole
+    rectangle_helper(x-5-swing,y+13,7,16,pants_color);//back leg
+    rectangle_helper(x+5+swing,y+13,7,16,pants_color);//front leg
+    rectangle_helper(x-5-swing,y+3,10,6,boot_color);//back boot
+    rectangle_helper(x+6+swing,y+3,10,6,boot_color);//front boot
+    rectangle_helper(x,by+31,22,32,coat_color);//long coat
+    rectangle_helper(x+2,by+31,1.5,32,coat_dark_color);//coat opening line
+    g_rotateMatrix = sword_rotate(x,by+32,30);
+    rectangle_helper(x,by+32,4,34,strap_color);//chest strap tilted 30 deg
+    g_rotateMatrix = glm::mat4(1.0f);//
+    rectangle_helper(x,by+47,23,5,scarf_color);//scarf
+    rectangle_helper(x-7,by+41,5,9,scarf_color);//scarf tail
+    circle_helper(x,by+56,17,17,skin_color);//head
+    rectangle_helper(x-4,by+54,3,6,hair_color);//sideburn
+    rectangle_helper(x+6,by+51.5,7,2.5,hair_color);//mustache
+    circle_helper(x+5,by+57,2.5,2.5,dark_color);//eye
+    circle_helper(x+9,by+54,4,4,skin_dark_color);//nose
+    circle_helper(x-1,by+64,18,11,beanie_color);//beanie
+    rectangle_helper(x-1,by+60,19,4,beanie_dark_color);//beanie fold
+    circle_helper(x-2,by+70,6,6,scarf_color);//pompom
+    rectangle_helper(x+8,by+38,44,3,wood_color);//harpoon shaft
+    rectangle_helper(x+28,by+38,3,5,steel_color);//steel collar
+    g_rotateMatrix = sword_rotate(x+33,by+38,-90);
+    triangle_helper(x+33,by+38,7,9,steel_color);//harpoon tip
+    g_rotateMatrix = glm::mat4(1.0f);
+    rectangle_helper(x+7,by+40,10,7,coat_color);//forearm
+    circle_helper(x+12,by+38,7,7,skin_color);//hand
+}
+
+void drawDockmaster(float x,float y){
+    glm::vec4 boot_color = glm::vec4(0.10, 0.08, 0.07,1.0);
+    glm::vec4 pants_color = glm::vec4(0.32, 0.32, 0.34,1.0);
+    glm::vec4 navy_color = glm::vec4(0.14, 0.19, 0.34,1.0);
+    glm::vec4 navy_dark_color = glm::vec4(0.09, 0.12, 0.24,1.0);
+    glm::vec4 gold_color = glm::vec4(0.85, 0.70, 0.20,1.0);
+    glm::vec4 black_color = glm::vec4(0.08, 0.08, 0.10,1.0);
+    glm::vec4 skin_color = glm::vec4(0.86, 0.66, 0.50,1.0);
+    glm::vec4 skin_dark_color = glm::vec4(0.74, 0.52, 0.38,1.0);
+    glm::vec4 grey_color = glm::vec4(0.72, 0.72, 0.74,1.0);
+    glm::vec4 cap_color = glm::vec4(0.93, 0.93, 0.90,1.0);
+    glm::vec4 wood_color = glm::vec4(0.55, 0.38, 0.21,1.0);
+    glm::vec4 wood_dark_color = glm::vec4(0.40, 0.27, 0.14,1.0);
+    glm::vec4 iron_color = glm::vec4(0.34, 0.35, 0.39,1.0);
+
+    rectangle_helper(x-8, y+12, 10, 16, pants_color);//back leg
+    rectangle_helper(x+8, y+12, 10, 16, pants_color);//front leg
+    rectangle_helper(x-9, y+3, 14, 6, boot_color);//back boot
+    rectangle_helper(x+9, y+3, 14, 6, boot_color);//front boot
+    rectangle_helper(x-19, y+35, 9, 20, navy_dark_color);//back arm
+    circle_helper(x-19, y+24, 8, 8, skin_dark_color);//back hand
+    rectangle_helper(x, y+33, 36, 30, navy_color);//body
+    rectangle_helper(x+3, y+33, 2, 30, navy_dark_color);//uniform line
+    for(int i = 28;i<45;i+=7){
+        circle_helper(x+7, y+i, 3.5, 3.5, gold_color);//buttons
+    }
+    rectangle_helper(x, y+21, 37, 5, black_color);//belt
+    rectangle_helper(x+3, y+21, 6, 6, gold_color);//buckle
+    rectangle_helper(x-13, y+47.5, 10, 3, gold_color);//shoulder piece
+    circle_helper(x, y+57, 20, 20, skin_color);//head
+    rectangle_helper(x-6, y+56, 4, 8, grey_color);//sideburn
+    circle_helper(x+6, y+52, 14, 5, grey_color);//mustache
+    circle_helper(x+10, y+55, 5, 5, skin_dark_color);//nose
+    circle_helper(x+5, y+59, 2.5, 2.5, black_color);//eye
+    rectangle_helper(x+5, y+61.5, 5, 1.5, grey_color);//eyebrow
+    rectangle_helper(x-1, y+67, 22, 6, cap_color);//cap top
+    rectangle_helper(x-1, y+64, 22, 3, navy_color);//cap band
+    rectangle_helper(x+8, y+62.5, 12, 2.5, black_color);//cap visor
+    circle_helper(x-1, y+67, 4, 4, gold_color);// cap badge
+    rectangle_helper(x+14, y+34, 9, 18, navy_color);//front arm
+    rectangle_helper(x+24, y+30, 14, 50, wood_color);//shield 
+    rectangle_helper(x+21, y+30, 1.5, 50, wood_dark_color);//plank line
+    rectangle_helper(x+27, y+30, 1.5, 50, wood_dark_color);//plank line
+    rectangle_helper(x+24, y+46, 15, 3.5, iron_color);//top iron band
+    rectangle_helper(x+24, y+14, 15, 3.5, iron_color);//bottom iron band
+    circle_helper(x+19, y+46, 2.5, 2.5, gold_color);// top left rivet
+    circle_helper(x+29, y+46, 2.5, 2.5, gold_color);//top right rivet
+    circle_helper(x+19, y+14, 2.5, 2.5, gold_color);//bottom left rivet
+    circle_helper(x+29, y+14, 2.5, 2.5, gold_color);//bottom right rivet
+    circle_helper(x+18, y+32, 8, 8, skin_color);//front hand on the shield
+}   
+
 void drawFisherman(float x,float y,float step,float angle){
     glm::vec4 boot_color = glm::vec4(0.15f, 0.12f, 0.10f, 1.0f);
     glm::vec4 pants_color = glm::vec4(0.20f, 0.25f, 0.40f, 1.0f);
@@ -431,6 +543,116 @@ void drawFirstMate(float x,float y,float step,float angle){
     circle_helper(x-20,by+23,8,8,skin_color);// front hand
 }
 
+void drawDeckhand(float x,float y,float step){
+    glm::vec4 boot_color = glm::vec4(0.12, 0.09, 0.07,1.0);
+    glm::vec4 pants_color = glm::vec4(0.62, 0.56, 0.44,1.0);
+    glm::vec4 coat_color = glm::vec4(0.60, 0.15, 0.16,1.0);
+    glm::vec4 coat_dark_color = glm::vec4(0.45, 0.10, 0.12,1.0);
+    glm::vec4 shirt_color = glm::vec4(0.90, 0.88, 0.80,1.0);
+    glm::vec4 gold_color = glm::vec4(0.85, 0.70, 0.20,1.0);
+    glm::vec4 skin_color = glm::vec4(0.84, 0.64, 0.48,1.0);
+    glm::vec4 skin_dark_color = glm::vec4(0.72, 0.52, 0.38,1.0);
+    glm::vec4 hair_color = glm::vec4(0.20, 0.14, 0.10,1.0);
+    glm::vec4 dark_color = glm::vec4(0.08, 0.08, 0.10,1.0);
+    glm::vec4 hat_color = glm::vec4(0.12, 0.12, 0.14,1.0);
+    glm::vec4 wood_color = glm::vec4(0.48, 0.30, 0.15,1.0);
+    glm::vec4 wood_dark_color = glm::vec4(0.34, 0.21, 0.10,1.0);
+    glm::vec4 steel_color = glm::vec4(0.45, 0.46, 0.50,1.0);
+
+    float swing = 4*step;
+    float by = y + fabs(step)*2;
+
+    rectangle_helper(x+6-swing, y+12, 5, 20, wood_color);//peg leg
+    rectangle_helper(x+6-swing, y+2, 7, 4, wood_dark_color);//peg tip
+    rectangle_helper(x-6+swing, y+13, 9, 16, pants_color);//front leg
+    rectangle_helper(x-8+swing, y+3, 13, 6, boot_color);//front boot
+    rectangle_helper(x+16, by+42, 8, 10, coat_dark_color);//back arm
+    rectangle_helper(x+3, by+31, 30, 34, coat_color);//long coat
+    rectangle_helper(x-4, by+36, 9, 24, shirt_color);//shirt
+    rectangle_helper(x+1, by+31, 2, 34, coat_dark_color);//coat edge
+    circle_helper(x+4, by+34, 3, 3, gold_color);//button
+    circle_helper(x+4, by+28, 3, 3, gold_color);//button
+    rectangle_helper(x+3, by+22, 31, 4, dark_color);//belt
+    rectangle_helper(x-2, by+22, 5, 5, gold_color);//buckle
+    rectangle_helper(x+9, by+57, 4, 12, hair_color);//ponytail
+    circle_helper(x, by+57, 18, 18, skin_color);//head
+    rectangle_helper(x-4, by+52, 8, 2.5, hair_color);//mustache
+    circle_helper(x-9, by+56, 5, 5, skin_dark_color);//nose
+    circle_helper(x-4, by+59, 2.5, 2.5, dark_color);//eye
+    rectangle_helper(x, by+66, 30, 4, hat_color);//hat brim
+    rectangle_helper(x, by+71, 18, 8, hat_color);//hat crown
+    triangle_helper(x-14, by+69, 6, 8, hat_color);//hat front tip
+    triangle_helper(x+14, by+69, 6, 8, hat_color);//hat back tip
+    rectangle_helper(x, by+67.5, 18, 1.5, gold_color);//hat trim
+    rectangle_helper(x+8, by+42, 14, 6, wood_color);//musket stock
+    rectangle_helper(x-11, by+42, 26, 4, wood_color);//musket body
+    rectangle_helper(x-22, by+44, 34, 2.5, steel_color);//musket barrel
+    rectangle_helper(x-38, by+44, 3, 4, steel_color);//muzzle
+    circle_helper(x+5, by+39, 7, 7, skin_dark_color);//trigger hand
+    rectangle_helper(x-9, by+40, 12, 6, coat_color);//front arm
+    circle_helper(x-16, by+42, 7, 7, skin_color);//front hand
+}
+
+void drawPowderMonkey(float x,float y,float step){
+    glm::vec4 pants_color = glm::vec4(0.42, 0.30, 0.18,1.0);
+    glm::vec4 shirt_color = glm::vec4(0.36, 0.52, 0.62,1.0);
+    glm::vec4 skin_color = glm::vec4(0.86, 0.66, 0.50,1.0);
+    glm::vec4 skin_dark_color = glm::vec4(0.74, 0.54, 0.40,1.0);
+    glm::vec4 hair_color = glm::vec4(0.55, 0.30, 0.12,1.0);
+    glm::vec4 dark_color = glm::vec4(0.10, 0.10, 0.12,1.0);
+    glm::vec4 wood_color = glm::vec4(0.55, 0.36, 0.18,1.0);
+    glm::vec4 spark_color = glm::vec4(1.00, 0.60, 0.10,1.0);
+
+    float swing = 4*step;
+    float by = y + fabs(step)*2;
+
+    rectangle_helper(x+5-swing, y+9, 7, 18, pants_color);//back leg
+    rectangle_helper(x-5+swing, y+9, 7, 18, pants_color);//front leg
+    rectangle_helper(x, by+26, 20, 20, shirt_color);//body
+    circle_helper(x, by+44, 18, 18, skin_color);//head
+    circle_helper(x+2, by+50, 19, 10, hair_color);//hair
+    circle_helper(x-4, by+46, 2.5, 2.5, dark_color);//eye
+    circle_helper(x-9, by+43, 4, 4, skin_dark_color);//nose
+    rectangle_helper(x-13, by+20, 16, 20, wood_color);//barrel
+    rectangle_helper(x-13, by+26, 17, 2.5, dark_color);//top band
+    rectangle_helper(x-13, by+14, 17, 2.5, dark_color);//bottom band
+    rectangle_helper(x-15, by+32, 2, 4, dark_color);//fuse
+    circle_helper(x-15, by+35, 4, 4, spark_color);//spark
+    circle_helper(x-20, by+21, 7, 7, skin_color);//hand
+}
+
+void drawFlyingHarpoon(float x,float y){
+    glm::vec4 wood = glm::vec4(0.50, 0.34, 0.18,1.0);
+    glm::vec4 steel = glm::vec4(0.78, 0.80, 0.84,1.0);
+    glm::vec4 rope = glm::vec4(0.82, 0.70, 0.46,1.0);
+    g_rotateMatrix = sword_rotate(x,y,-90 + 10*sin(x/10));
+    rectangle_helper(x, y-19, 1.5, 8, rope);//rope tail
+    rectangle_helper(x, y, 3, 30, wood);//shaft
+    rectangle_helper(x, y+12, 5, 3, steel);//collar
+    triangle_helper(x, y+18, 7, 9, steel);//tip
+    g_rotateMatrix = glm::mat4(1.0f);
+}
+
+void drawShot(float x,float y){
+    glm::vec4 smoke = glm::vec4(0.75, 0.75, 0.78,1.0);
+    glm::vec4 iron = glm::vec4(0.20, 0.20, 0.23,1.0);
+
+    circle_helper(x+14, y, 4, 4, smoke);
+    circle_helper(x+8, y, 6, 6, smoke);
+    circle_helper(x, y, 7, 7, iron);
+}
+
+void drawRollingBarrel(float x,float y){
+    glm::vec4 wood = glm::vec4(0.55,0.36,0.18,1.0);
+    glm::vec4 dark = glm::vec4(0.10,0.10,0.12,1.0);
+
+    g_rotateMatrix = sword_rotate(x,y,-4*x);
+    circle_helper(x, y, 15, 15, wood);//barrel end
+    rectangle_helper(x, y, 15, 2.5, dark);//band
+    rectangle_helper(x, y, 2.5, 15, dark);//band
+    g_rotateMatrix = glm::mat4(1.0f);
+}
+
 void drawhealthbar(float x,float y,int health,int max_health){
     glm::vec4 gray_color = glm::vec4(0.75f,0.75f,0.75f,1.0f);
     glm::vec4 green_color = glm::vec4(0.13f,0.73f,0.38f,1.0f);
@@ -457,6 +679,18 @@ bool drawbutton(float x,float y,std::string s,glm::vec4 button_color,glm::vec4 t
     float offset = ((s.length()-1)*step)/2;
     drawword(x-offset,y,w,h,th,text_color,s);
     return check;
+}
+
+void drawsubtitle(float x,float y,std::string s){
+    glm::vec4 box_color = glm::vec4(0.05, 0.05, 0.08,1.0);
+    glm::vec4 text_color = glm::vec4(1.0, 0.95, 0.80,1.0);
+    float w = 12;
+    float h = 20;
+    float th = 3;
+    float step = w + 4;
+    float offset = ((s.length()-1)*step)/2;
+    rectangle_helper(x,y,s.length()*16 + 12,32,box_color);
+    drawword(x - offset,y,w,h,th,text_color,s);
 }
 
 void drawcard(float x,float y,Player_type type){
@@ -494,10 +728,10 @@ void drawcard(float x,float y,Player_type type){
         drawFisherman(x-3.5,y-28,0,0);
     }else if(type == Player_type::Harpooner){
         card2 = cursor_check;
-        //drawharpooner untill we do it;
+        drawHarpoon (x-9,y-28,0);
     }else{
         card3 = cursor_check;
-        //drawdockmaster untill we do it;
+        drawDockmaster(x-4,y-28);
     }
     g_grey = 0;
 }
@@ -541,23 +775,44 @@ void drawBackground(){
 
 void drawCutscene(){
         drawBackground();
-        float angle = fabs(60*sin(t));
-        if(180 + elapsed*15 <= 400){
+        float fx = 180 + elapsed*15;
+        float px = 778 - elapsed*15;
+        float angle = 0;
+        if(elapsed>=17)
+            angle = fabs(60*sin(t));
+        if(fx <= 400){
             float step = sin(4*t);
-            drawFisherman(180 + elapsed*15,128,step,-angle);
+            drawFisherman(fx,128,step,-angle);
 
         }
         else{
-            drawFisherman(400,128,0,-angle);
+            fx = 400;
+            drawFisherman(fx,128,0,-angle);
         }
 
-        if(778 - elapsed*15 >= 530){
+        if(px >= 530){
             float step = sin(4*t);
-            drawFirstMate(778 - elapsed*15,128,step,angle);
+            drawFirstMate(px,128,step,angle);
         }
         else{
-            drawFirstMate(530,128,0,angle);
+            px = 530;
+            drawFirstMate(px,128,0,angle);
         }
+        if(elapsed < 3.5){
+            drawsubtitle(380, 520, "THE LAST LIGHTHOUSE");
+        }else if(elapsed < 7.5){
+            drawsubtitle(380, 520, "IT LEADS OUR SHIPS HOME");
+        }else if(elapsed>=8.5 && elapsed<11){
+            drawsubtitle(px, 235, "PUT OUT THE LIGHT");
+        }else if(elapsed>= 11 && elapsed<14){
+            drawsubtitle(px, 235, "LET THEIR SHIPS CRASH");
+        }else if(elapsed>=14 && elapsed<17){
+            drawsubtitle(fx, 235, "THE LIGHT STAYS ON");
+        }else if (elapsed>=17)
+        {
+            drawsubtitle(px,235,"CHARGE");
+        }
+        
         if(elapsed>=20){
             currentscreen = Screens::game;
         }
@@ -578,7 +833,7 @@ void spawnprojectiles(int lane,float posx,Projectile_type proj_type){
     Projectiles p;
     p.lane = lane;
     p.posx = posx;
-    p.height = proj_type == Projectile_type::Harpoon?30: proj_type==Projectile_type::Shot? 50 : 10;
+    p.height = proj_type == Projectile_type::Harpoon?38: proj_type==Projectile_type::Shot? 50 : 10;
     p.speed = proj_type == Projectile_type::Harpoon?200:-200;
     p.proj_type = proj_type;
     p.hit = false;
@@ -643,7 +898,16 @@ void updateshooting(float dt){
             if(p.shooting_time<1)
                 p.shooting_time+=dt;
             else{   
+                float h = 38;
                 spawnprojectiles(p.lane,p.posx,Projectile_type::Harpoon);
+                if(p.jump_time>0){
+                    float progress = ((0.5 - p.jump_time)/0.5);
+                    h = h + 30*sin(progress*3.14159f);
+                }
+                if(p.duck_time>0){
+                    h = h*0.6;
+                }
+                projectiles.back().height = h;
                 p.shooting_time = 0;
             }
         }
@@ -884,6 +1148,7 @@ void drawgamescreen(){
     drawcard(200,534,Player_type::Fisherman);
     drawcard(280,534,Player_type::Harpooner);
     drawcard(360,534,Player_type::Dockmaster);
+    float angle = fabs(60*sin(t));
     for(Player& p : players){
         drawhealthbar(p.posx,y_arr[p.lane] + 88,p.health,p.max_health);
         g_hurt = 1 - ((float)p.health/p.max_health);
@@ -897,11 +1162,20 @@ void drawgamescreen(){
             if(p.duck_time > 0){
                 g_squashMatrix = duck_squash(p.posx,y_arr[p.lane]+8,0.6);
             }
-            drawFisherman(p.posx,y_arr[p.lane] + 8 + jump,step,0);
+            drawFisherman(p.posx,y_arr[p.lane] + 8 + jump,step,-angle);
         }else if(p.player_type == Player_type::Dockmaster){
-            rectangle_helper(500,300,300,100,glm::vec4(1.0,1.0,1.0,1.0));
+            drawDockmaster(p.posx,y_arr[p.lane] + 8);
         }else if(p.player_type == Player_type::Harpooner){
-            rectangle_helper(500,300,300,100,glm::vec4(0.7,0.5,1.0,1.0));
+            float step = !p.stopped?sin(4*t):0;
+            float progress = (0.5 - p.jump_time)/0.5;
+            float jump = 0;
+            if(p.jump_time >= 0){
+                jump = 30*sin(progress*3.14159f);
+            }
+            if(p.duck_time > 0){
+                g_squashMatrix = duck_squash(p.posx,y_arr[p.lane]+8,0.6);
+            }
+            drawHarpoon(p.posx,y_arr[p.lane] + 8 + jump,step);  
         }
         g_hurt = 0;
         g_squashMatrix = glm::mat4(1.0f);
@@ -912,19 +1186,25 @@ void drawgamescreen(){
         g_hurt = 1 - ((float)e.health/e.max_health);
         if(e.enemy_type == Enemy_type::FirstMate){
             float step = !e.stopped?sin(((e.speed)/4)*t):0;
-            drawFirstMate(e.posx,y_arr[e.lane] + 8,step,0);
+            drawFirstMate(e.posx,y_arr[e.lane] + 8,step,angle);
         }else if(e.enemy_type == Enemy_type::Deckhand){
             float step = !e.stopped?sin(((e.speed)/4)*t):0;
-            drawFirstMate(e.posx,y_arr[e.lane] + 8,step,0);
+            drawDeckhand(e.posx,y_arr[e.lane] + 8,step);
         }else if(e.enemy_type == Enemy_type::PowderMonkey){
             float step = !e.stopped?sin(((e.speed)/4)*t):0;
-            drawFirstMate(e.posx,y_arr[e.lane] + 8,step,0);
+            drawPowderMonkey(e.posx,y_arr[e.lane] + 8,step);
         }
         g_hurt = 0;
     }
 
     for(Projectiles& p : projectiles){
-        rectangle_helper(p.posx,y_arr[p.lane]+8+p.height,24,4,glm::vec4(1,1,1,1));
+        if(p.proj_type == Projectile_type::Harpoon){
+            drawFlyingHarpoon(p.posx,y_arr[p.lane] + 8 + p.height);
+        }else if(p.proj_type == Projectile_type::Shot){
+            drawShot(p.posx,y_arr[p.lane] + 8 + p.height);
+        }else{
+            drawRollingBarrel(p.posx,y_arr[p.lane] + 8 + p.height);
+        }
     }
 
     for(Collectibles& c:collectibles){
